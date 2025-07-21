@@ -83,14 +83,10 @@ export default function CityPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      // In a real implementation, call Eventbrite API here
-      // const response = await fetch(`/api/events/${citySlug}`);
-      // const data = await response.json();
-      // setEvents(data.events);
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setEvents(mockEvents);
+      // Fetch from backend
+      const response = await fetch('http://localhost:5000/events');
+      const data = await response.json();
+      setEvents(data);
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {
