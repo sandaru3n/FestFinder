@@ -152,6 +152,9 @@ export function HeaderNav() {
               </NavigationMenuList>
             </NavigationMenu>
 
+            <Link href="/" className="text-slate-700 hover:text-orange-600 text-sm font-medium">
+              Home
+            </Link>
             <Link href="/about" className="text-slate-700 hover:text-orange-600 text-sm font-medium">
               About
             </Link>
@@ -163,9 +166,6 @@ export function HeaderNav() {
 
           {/* User Menu - Desktop */}
           <div className="hidden md:flex items-center space-x-3 ml-4">
-            <Button variant="ghost" size="sm" className="text-slate-700 hover:text-orange-600">
-              Help Center
-            </Button>
             <Button variant="outline" size="sm" className="border-slate-300">
               Log In
             </Button>
@@ -220,22 +220,27 @@ export function HeaderNav() {
             </div>
 
             {/* Mobile Links */}
-            <div className="space-y-2 border-t border-slate-200 pt-4">
-              <Link
-                href="/about"
-                className="block text-slate-700 hover:text-orange-600 py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                About
-              </Link>
-              <div className="flex space-x-3 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  Log In
-                </Button>
-                <Button size="sm" className="flex-1 bg-orange-600 hover:bg-orange-700">
-                  Sign Up
-                </Button>
-              </div>
+            <Link
+              href="/"
+              className="block text-slate-700 hover:text-orange-600 py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="/about"
+              className="block text-slate-700 hover:text-orange-600 py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              About
+            </Link>
+            <div className="flex space-x-3 pt-2">
+              <Button variant="outline" size="sm" className="flex-1">
+                Log In
+              </Button>
+              <Button size="sm" className="flex-1 bg-orange-600 hover:bg-orange-700">
+                Sign Up
+              </Button>
             </div>
           </div>
         )}
