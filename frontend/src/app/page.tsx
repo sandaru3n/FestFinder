@@ -86,15 +86,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header Ad Zone */}
-      <div className="w-full bg-slate-100 py-3 border-b border-slate-200">
-        <div className="container mx-auto px-4 text-center">
-          <div className="h-20 bg-slate-200 rounded flex items-center justify-center text-slate-500 text-sm">
-            Header Ad Zone (728x90)
-          </div>
-        </div>
-      </div>
-
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
