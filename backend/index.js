@@ -6,6 +6,7 @@ const Event = require('./models/Event');
 const User = require('./models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { EventbriteService } = require('./eventbrite');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -64,6 +65,28 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({ token });
   } catch (err) {
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Fetch events by user location
+app.post('/api/events/nearby', async (req, res) => {
+  const { latitude, longitude, radius, category, priceFilter, dateFilter, query, page, limit } = req.body;
+  try {
+    const eventbrite = new EventbriteService(process.env.EVENTBRITE_API_KEY);
+    const events = await eventbrite.fetchWorldwideEvents({
+      latitude,
+      longitude,
+      radius,
+      category,
+      priceFilter,
+      dateFilter,
+      query,
+      page,
+      limit
+    });
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch events from Eventbrite' });
   }
 });
 

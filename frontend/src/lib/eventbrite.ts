@@ -167,6 +167,91 @@ export class EventbriteService {
   }
 
   /**
+   * Fetch worldwide events with optional location filter
+   */
+  async fetchWorldwideEvents(options: {
+    latitude?: number;
+    longitude?: number;
+    radius?: string; // e.g., '50km', '100mi'
+    category?: string;
+    priceFilter?: "free" | "paid" | "all";
+    dateFilter?: "today" | "weekend" | "week" | "all";
+    query?: string;
+    page?: number;
+    limit?: number;
+  } = {}): Promise<EventbriteResponse> {
+    try {
+      if (!this.apiKey) {
+        // fallback to mock events for New York if no API key
+        return this.getMockEvents("new-york", options);
+      }
+      const params = new URLSearchParams();
+      // Location filter
+      if (options.latitude && options.longitude) {
+        params.append("location.latitude", options.latitude.toString());
+        params.append("location.longitude", options.longitude.toString());
+        params.append("location.within", options.radius || "100km");
+      }
+      // Expand related objects
+      params.append("expand", "venue,category,subcategory,format,ticket_availability");
+      params.append("sort_by", "date");
+      params.append("start_date.range_start", new Date().toISOString());
+      // Category filter
+      if (options.category && options.category !== "all") {
+        const categoryId = CATEGORY_MAPPING[options.category as keyof typeof CATEGORY_MAPPING];
+        if (categoryId) {
+          params.append("categories", categoryId);
+        }
+      }
+      // Search query
+      if (options.query) {
+        params.append("q", options.query);
+      }
+      // Price filter
+      if (options.priceFilter === "free") {
+        params.append("price", "free");
+      } else if (options.priceFilter === "paid") {
+        params.append("price", "paid");
+      }
+      // Date filter
+      if (options.dateFilter === "today") {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        params.append("start_date.range_end", tomorrow.toISOString());
+      } else if (options.dateFilter === "weekend") {
+        const now = new Date();
+        const daysUntilSaturday = (6 - now.getDay()) % 7;
+        const saturday = new Date(now);
+        saturday.setDate(now.getDate() + daysUntilSaturday);
+        const monday = new Date(saturday);
+        monday.setDate(saturday.getDate() + 2);
+        params.append("start_date.range_start", saturday.toISOString());
+        params.append("start_date.range_end", monday.toISOString());
+      }
+      // Pagination
+      params.append("page", (options.page || 1).toString());
+      params.append("page_size", (options.limit || 50).toString());
+      const url = `${this.baseUrl}/events/search/?${params.toString()}`;
+      const response = await fetch(url, {
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json"
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Eventbrite API error: ${response.status}`);
+      }
+      const data = await response.json();
+      return this.transformEventbriteResponse(data);
+    } catch (error) {
+      console.error("Error fetching worldwide Eventbrite events:", error);
+      // fallback to mock events for New York
+      return this.getMockEvents("new-york", options);
+    }
+  }
+
+  /**
    * Build URL parameters for Eventbrite API
    */
   private buildEventbriteParams(

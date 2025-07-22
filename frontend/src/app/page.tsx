@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Users, Search, TrendingUp, Star } from "lucide-react";
+import { EventbriteEvent } from "@/lib/eventbrite";
 
 const majorCities = [
   {
@@ -61,23 +62,52 @@ const majorCities = [
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [userLocation, setUserLocation] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [nearbyEvents, setNearbyEvents] = useState<EventbriteEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [eventsError, setEventsError] = useState<string | null>(null);
 
   useEffect(() => {
     // Auto-detect user location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // In a real app, you'd reverse geocode these coordinates
-          setUserLocation("Detected location");
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
         },
         () => {
-          // Fallback if location access denied
           setUserLocation(null);
         }
       );
     }
   }, []);
+
+  useEffect(() => {
+    if (userLocation) {
+      setLoadingEvents(true);
+      setEventsError(null);
+      fetch("/api/events/nearby", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          radius: "50km",
+          limit: 12
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          setNearbyEvents(data.events || []);
+        })
+        .catch(() => {
+          setEventsError("Could not load nearby events.");
+        })
+        .finally(() => setLoadingEvents(false));
+    }
+  }, [userLocation]);
 
   const filteredCities = majorCities.filter(city =>
     city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -181,6 +211,53 @@ export default function Home() {
             </Link>
           ))}
         </div>
+
+        {/* Nearby Events Section */}
+        {userLocation && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold mb-4 text-center">Events Near You</h2>
+            {loadingEvents && <div className="text-center text-slate-500">Loading events...</div>}
+            {eventsError && <div className="text-center text-red-500">{eventsError}</div>}
+            {!loadingEvents && !eventsError && nearbyEvents.length === 0 && (
+              <div className="text-center text-slate-500">No events found near your location.</div>
+            )}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {nearbyEvents.map(event => (
+                <Card key={event.id} className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer border-2 hover:border-blue-300">
+                  <div className="relative">
+                    {event.logo?.url && (
+                      <img
+                        src={event.logo.url}
+                        alt={event.name}
+                        className="w-full h-48 object-cover rounded-t-lg"
+                      />
+                    )}
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{event.name}</span>
+                    </CardTitle>
+                    <CardDescription>
+                      {event.venue?.address?.localized_address_display || ""}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <Badge>{event.category?.name}</Badge>
+                      {event.is_free && <Badge className="bg-green-500 text-white">Free</Badge>}
+                    </div>
+                    <div className="text-slate-600 text-sm mb-2">
+                      {event.start?.local ? new Date(event.start.local).toLocaleString() : ""}
+                    </div>
+                    <a href={event.url} target="_blank" rel="noopener noreferrer">
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">View Event</Button>
+                    </a>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Sidebar Ad Zone */}
         <div className="lg:absolute lg:right-4 lg:top-1/2 lg:transform lg:-translate-y-1/2 mb-8 lg:mb-0">
