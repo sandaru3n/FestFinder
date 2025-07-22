@@ -8,6 +8,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { EventbriteService } = require('./eventbrite');
 
+// Initialize Eventbrite service with API key and private token from environment variables
+const eventbrite = new EventbriteService(process.env.EVENTBRITE_API_KEY, process.env.EVENTBRITE_PRIVATE_TOKEN);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/festfinder';
@@ -18,6 +21,70 @@ app.use(express.json());
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
+
+// OAuth Authorization for Eventbrite
+app.get('/api/eventbrite/authorize', (req, res) => {
+  const clientId = process.env.EVENTBRITE_API_KEY;
+  const redirectUri = process.env.EVENTBRITE_REDIRECT_URI;
+  const authUrl = `https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  res.redirect(authUrl);
+});
+
+// OAuth Callback to retrieve token
+app.get('/api/eventbrite/callback', async (req, res) => {
+  const code = req.query.code;
+  const clientId = process.env.EVENTBRITE_API_KEY;
+  const clientSecret = process.env.EVENTBRITE_CLIENT_SECRET;
+  const redirectUri = process.env.EVENTBRITE_REDIRECT_URI;
+
+  if (!code) {
+    return res.status(400).json({ error: 'No authorization code provided' });
+  }
+
+  try {
+    const tokenResponse = await fetch('https://www.eventbrite.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        client_secret: clientSecret,
+        code: code,
+        redirect_uri: redirectUri
+      }).toString()
+    });
+
+    if (!tokenResponse.ok) {
+      throw new Error(`Token exchange failed with status: ${tokenResponse.status}`);
+    }
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+    console.log(`Received OAuth access token for Eventbrite`);
+
+    // Store the token securely (for simplicity, logging it; in production, store in a secure session or database)
+    // For now, we'll return it to the client for demonstration, but this is not secure
+    res.json({ access_token: accessToken, message: 'OAuth token retrieved successfully. Store this securely.' });
+
+    // In a real app, update the EventbriteService instance or store for future requests
+    // eventbrite.setOAuthToken(accessToken);
+  } catch (error) {
+    console.error(`Error during OAuth token exchange:`, error);
+    res.status(500).json({ error: 'Failed to retrieve OAuth token from Eventbrite' });
+  }
+});
+
+// Temporary endpoint to set OAuth token in EventbriteService (for demonstration; secure in production)
+app.post('/api/eventbrite/set-token', (req, res) => {
+  const { access_token } = req.body;
+  if (!access_token) {
+    return res.status(400).json({ error: 'No access token provided' });
+  }
+  eventbrite.setOAuthToken(access_token);
+  res.json({ message: 'OAuth token set successfully in EventbriteService' });
+});
 
 app.get('/', (req, res) => {
   res.send('FestFinder backend is running!');
@@ -72,21 +139,22 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/events/nearby', async (req, res) => {
   const { latitude, longitude, radius, category, priceFilter, dateFilter, query, page, limit } = req.body;
   try {
-    const eventbrite = new EventbriteService(process.env.EVENTBRITE_API_KEY);
     const events = await eventbrite.fetchWorldwideEvents({
-      latitude,
-      longitude,
-      radius,
-      category,
-      priceFilter,
-      dateFilter,
-      query,
-      page,
-      limit
+      latitude, longitude, radius, category, priceFilter, dateFilter, query, page, limit
     });
     res.json(events);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch events from Eventbrite' });
+  }
+});
+
+// Fetch user organizations from Eventbrite
+app.get('/api/eventbrite/organizations', async (req, res) => {
+  try {
+    const organizations = await eventbrite.fetchUserOrganizations();
+    res.json(organizations);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch organizations from Eventbrite' });
   }
 });
 

@@ -66,6 +66,7 @@ export default function Home() {
   const [nearbyEvents, setNearbyEvents] = useState<EventbriteEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [eventsError, setEventsError] = useState<string | null>(null);
+  const [eventsMessage, setEventsMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Auto-detect user location
@@ -102,9 +103,15 @@ export default function Home() {
         .then(res => res.json())
         .then(data => {
           setNearbyEvents(data.events || []);
+          if (data.message) {
+            setEventsMessage(data.message); // Display message like 'No events found near your location. Showing broader results.'
+          } else {
+            setEventsMessage(null);
+          }
         })
         .catch(() => {
           setEventsError("Could not load nearby events.");
+          setEventsMessage(null);
         })
         .finally(() => setLoadingEvents(false));
     }
@@ -219,6 +226,11 @@ export default function Home() {
             <h2 className="text-2xl font-semibold mb-4 text-center">Events Near You</h2>
             {loadingEvents && <div className="text-center text-slate-500">Loading events...</div>}
             {eventsError && <div className="text-center text-red-500">{eventsError}</div>}
+            {eventsMessage && (
+              <div className="mb-4 text-yellow-600 bg-yellow-100 p-3 rounded-md text-sm">
+                {eventsMessage}
+              </div>
+            )}
             {!loadingEvents && !eventsError && nearbyEvents.length === 0 && (
               <div className="text-center text-slate-500">No events found near your location.</div>
             )}

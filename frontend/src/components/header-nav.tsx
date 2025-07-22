@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,45 @@ export function HeaderNav() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
+  // List of countries for manual selection
+  const countries = [
+    "United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "India", "Brazil", "Japan", "South Africa", "Sri Lanka"
+  ];
+
+  // Handle manual country selection
+  const handleLocationChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedLocation(event.target.value);
+  };
+
+  // Detect user location on component mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Use Nominatim API to reverse geocode coordinates to country
+          fetch(`https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json&zoom=3`)
+            .then(res => res.json())
+            .then(data => {
+              const country = data.address?.country || "United States"; // Fallback to United States if country not found
+              setSelectedLocation(country);
+            })
+            .catch(() => {
+              console.error("Failed to fetch country from Nominatim API");
+              setSelectedLocation("United States"); // Fallback on API error
+            });
+        },
+        () => {
+          // Fallback if location access denied
+          console.log("Location access denied");
+          setSelectedLocation("United States");
+        }
+      );
+    } else {
+      console.log("Geolocation not supported");
+      setSelectedLocation("United States");
+    }
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -63,7 +102,7 @@ export function HeaderNav() {
             <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
               <Calendar className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-slate-900">EventsFinder</span>
+            <span className="text-xl font-bold text-slate-900">FestFinder</span>
           </Link>
 
           {/* Search Bar - Desktop */}
@@ -82,28 +121,18 @@ export function HeaderNav() {
 
           {/* Location Selector - Desktop */}
           <div className="hidden md:block">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="h-10 px-3 border-slate-300">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  {selectedLocation}
-                  <ChevronDown className="w-4 h-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                {cities.map((city) => (
-                  <DropdownMenuItem
-                    key={city.slug}
-                    onClick={() => {
-                      setSelectedLocation(city.name);
-                      router.push(`/city/${city.slug}`);
-                    }}
-                  >
-                    {city.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <select 
+              className="rounded-md border p-2 text-sm bg-white text-slate-900 border-slate-300 h-10 px-3"
+              value={selectedLocation}
+              onChange={handleLocationChange}
+              aria-label="Select your location"
+            >
+              {countries.map(country => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Desktop Navigation */}
@@ -210,6 +239,22 @@ export function HeaderNav() {
                 />
               </div>
             </form>
+
+            {/* Mobile Location Selector */}
+            <div className="mb-4">
+              <select 
+                className="rounded-md border p-2 text-sm bg-white text-slate-900 border-slate-300 w-full"
+                value={selectedLocation}
+                onChange={handleLocationChange}
+                aria-label="Select your location"
+              >
+                {countries.map(country => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Mobile Cities */}
             <div className="mb-4">
