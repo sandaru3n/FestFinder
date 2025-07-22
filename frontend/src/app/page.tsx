@@ -88,7 +88,8 @@ export default function Home() {
     if (userLocation) {
       setLoadingEvents(true);
       setEventsError(null);
-      fetch("/api/events/nearby", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      fetch(`${backendUrl}/api/events/nearby`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
