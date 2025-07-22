@@ -35,8 +35,9 @@ export default function LoginPage() {
       // Store token and redirect
       localStorage.setItem("token", data.token);
       router.push("/");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Login failed");
     } finally {
       setLoading(false);
     }
