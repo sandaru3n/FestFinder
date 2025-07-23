@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { HeaderNav } from "@/components/header-nav";
 
 export default function ClientBody({
@@ -14,9 +15,12 @@ export default function ClientBody({
     document.body.className = "antialiased";
   }, []);
 
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith('/admin');
+
   return (
     <div className="antialiased">
-      <HeaderNav />
+      {!isAdminRoute && <HeaderNav />}
       {children}
     </div>
   );
