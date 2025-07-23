@@ -39,7 +39,7 @@ export default function EventDetailsPage() {
   useEffect(() => {
     if (!eventId) return;
     setLoading(true);
-    fetch(`http://localhost:5000/events/${eventId}`)
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/events/${eventId}`)
       .then(res => res.json())
       .then(data => {
         setEvent(data);
@@ -54,7 +54,7 @@ export default function EventDetailsPage() {
   // Fetch related events
   useEffect(() => {
     if (!eventId) return;
-    fetch(`http://localhost:5000/events/${eventId}/related`)
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/events/${eventId}/related`)
       .then(res => res.json())
       .then(data => {
         setRelatedEvents(data);

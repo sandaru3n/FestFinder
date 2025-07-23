@@ -39,7 +39,7 @@ export default function AllEventsPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/events");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/events`);
       const data = await response.json();
       setEvents(data || []);
     } catch (error) {
