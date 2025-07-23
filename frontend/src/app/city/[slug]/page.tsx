@@ -334,7 +334,7 @@ export default function CityPage() {
                                   className="inline-flex"
                                 >
                                   <Button size="sm">
-                                    View Event
+                                    Event Details
                                     <ExternalLink className="w-4 h-4 ml-2" />
                                   </Button>
                                 </a>
