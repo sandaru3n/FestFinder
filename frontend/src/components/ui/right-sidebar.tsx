@@ -13,6 +13,20 @@ export function RightSidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start"
+          onClick={() => router.push("/dashboard")}
+        >
+          My Dashboard
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={() => router.push("/dashboard#my-events")}
+        >
+          My Events
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start"
           onClick={() => router.push("/add-event")}
         >
           Add Event

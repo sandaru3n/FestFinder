@@ -24,7 +24,8 @@ const EventSchema = new mongoose.Schema({
   },
   logo: {
     url: String
-  }
+  },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 });
 
 module.exports = mongoose.model('Event', EventSchema); 

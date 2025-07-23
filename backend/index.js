@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
 const Event = require('./models/Event');
 const User = require('./models/User');
 const bcrypt = require('bcrypt');
@@ -17,6 +19,21 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/festfi
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the uploads directory
+app.use('/uploads', express.static('uploads'));
+
+// Set up multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
@@ -96,6 +113,190 @@ app.get('/events', async (req, res) => {
     res.json(events);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch events' });
+  }
+});
+
+// Route to get all events (filtered by user or admin)
+app.get('/api/events', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+      }
+
+      let query = {};
+      // If not admin, filter by user who created the event (assuming user ID is in token)
+      if (decoded.role !== 'admin') {
+        query = { createdBy: decoded.userId };
+      }
+
+      const events = await Event.find(query);
+      res.json(events);
+    });
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to get a single event by ID
+app.get('/api/events/:id', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+      }
+
+      const event = await Event.findById(req.params.id);
+      if (!event) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+
+      // Check if user is admin or the creator of the event
+      if (decoded.role !== 'admin' && event.createdBy.toString() !== decoded.userId) {
+        return res.status(403).json({ error: 'Forbidden: You do not have permission to view this event' });
+      }
+
+      res.json(event);
+    });
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to update an existing event
+app.put('/api/events/:id', upload.single('image'), async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+      }
+
+      const event = await Event.findById(req.params.id);
+      if (!event) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+
+      // Check if user is admin or the creator of the event
+      if (decoded.role !== 'admin' && event.createdBy.toString() !== decoded.userId) {
+        return res.status(403).json({ error: 'Forbidden: You do not have permission to update this event' });
+      }
+
+      const { name, dateTime, location, description, country, city, tags, organizedBy } = req.body;
+      if (!name || !dateTime || !location || !country || !city || !organizedBy) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const eventData = {
+        name,
+        description,
+        start: { local: dateTime, timezone: 'UTC' },
+        venue: { name: location, address: { localized_address_display: `${city}, ${country}` } },
+        category: { name: tags || '' },
+      };
+
+      // If a new image was uploaded, update the path
+      if (req.file) {
+        eventData.logo = { url: `/uploads/${req.file.filename}` };
+      }
+
+      const updatedEvent = await Event.findByIdAndUpdate(req.params.id, eventData, { new: true });
+      res.json(updatedEvent);
+    });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to delete an event
+app.delete('/api/events/:id', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+      }
+
+      const event = await Event.findById(req.params.id);
+      if (!event) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+
+      // Check if user is admin or the creator of the event
+      if (decoded.role !== 'admin' && event.createdBy.toString() !== decoded.userId) {
+        return res.status(403).json({ error: 'Forbidden: You do not have permission to delete this event' });
+      }
+
+      await Event.findByIdAndDelete(req.params.id);
+      res.json({ message: 'Event deleted successfully' });
+    });
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to create a new event
+app.post('/api/events', upload.single('image'), async (req, res) => {
+  try {
+    // Verify JWT token for authentication
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+      }
+
+      const { name, dateTime, location, description, country, city, tags, organizedBy } = req.body;
+      if (!name || !dateTime || !location || !country || !city || !organizedBy) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const eventData = {
+        name,
+        description,
+        start: { local: dateTime, timezone: 'UTC' },
+        venue: { name: location, address: { localized_address_display: `${city}, ${country}` } },
+        category: { name: tags || '' },
+        createdBy: decoded.userId
+      };
+
+      // If an image was uploaded, add the path to the event data
+      if (req.file) {
+        eventData.logo = { url: `/uploads/${req.file.filename}` };
+      }
+
+      const newEvent = new Event(eventData);
+      const savedEvent = await newEvent.save();
+      res.status(201).json(savedEvent);
+    });
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
