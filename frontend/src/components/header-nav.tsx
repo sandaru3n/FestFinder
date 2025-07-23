@@ -146,44 +146,12 @@ export function HeaderNav() {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-slate-700 hover:text-orange-600">
-                    Browse Events
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid w-96 p-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <h3 className="font-semibold text-slate-900 mb-3">By City</h3>
-                          <div className="space-y-2">
-                            {cities.slice(0, 3).map((city) => (
-                              <Link
-                                key={city.slug}
-                                href={`/city/${city.slug}`}
-                                className="block text-sm text-slate-600 hover:text-orange-600"
-                              >
-                                {city.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 mb-3">By Category</h3>
-                          <div className="space-y-2">
-                            {categories.slice(0, 3).map((category) => (
-                              <Link
-                                key={category}
-                                href={`/city/new-york?category=${encodeURIComponent(category)}`}
-                                className="block text-sm text-slate-600 hover:text-orange-600"
-                              >
-                                {category}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </NavigationMenuContent>
+                  <NavigationMenuLink href="/all-events" className="text-slate-700 hover:text-orange-600 text-base font-medium">
+                    All Events
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
+                {/* Remove the old Browse Events trigger/menu */}
+                {/* ...other nav items... */}
               </NavigationMenuList>
             </NavigationMenu>
 
@@ -290,6 +258,13 @@ export function HeaderNav() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
+            </Link>
+            <Link
+              href="/all-events"
+              className="block text-slate-700 hover:text-orange-600 py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              All Events
             </Link>
             <div className="flex space-x-3 pt-2">
               {!isLoggedIn ? (
