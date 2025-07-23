@@ -127,6 +127,22 @@ app.get('/events/:id', async (req, res) => {
   }
 });
 
+// Public route to get related events by category (excluding the current event)
+app.get('/events/:id/related', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+    const relatedEvents = await Event.find({
+      _id: { $ne: event._id },
+      'category.name': event.category.name
+    })
+      .limit(4);
+    res.json(relatedEvents);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch related events' });
+  }
+});
+
 // Route to get all events (filtered by user or admin)
 app.get('/api/events', async (req, res) => {
   try {
