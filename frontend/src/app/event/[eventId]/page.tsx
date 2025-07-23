@@ -26,6 +26,7 @@ type Event = {
   category?: { name?: string };
   logo?: { url?: string };
   organizer?: { name?: string; logo?: string };
+  ticket_price?: string;
 };
 
 export default function EventDetailsPage() {
@@ -224,8 +225,7 @@ export default function EventDetailsPage() {
         <aside className="w-full md:w-80 flex-shrink-0 md:sticky md:top-24 h-fit">
           <div className="bg-white border border-slate-200 rounded-xl shadow p-6 mb-6">
             <div className="mb-4">
-              <div className="text-2xl font-bold mb-1">{event.is_free ? "Free" : `$${event.ticket_availability?.minimum_ticket_price?.major_value}`}</div>
-              <div className="text-slate-500 text-sm">{event.ticket_availability?.has_available_tickets ? "Tickets available" : "Sold out"}</div>
+              <div className="text-2xl font-bold mb-1">{event.ticket_price || (event.is_free ? "Free" : "")}</div>
             </div>
             <Button className="w-full mb-2" size="lg">
               <ExternalLink className="w-4 h-4 mr-2" />

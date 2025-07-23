@@ -225,10 +225,13 @@ app.put('/api/events/:id', upload.single('image'), async (req, res) => {
         return res.status(403).json({ error: 'Forbidden: You do not have permission to update this event' });
       }
 
-      const { name, dateTime, location, description, country, city, tags, organizedBy } = req.body;
+      const { name, dateTime, location, description, country, city, tags, organizedBy, is_free, ticket_price } = req.body;
       if (!name || !dateTime || !location || !country || !city || !organizedBy) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
+
+      let finalIsFree = is_free === true || is_free === 'true';
+      let finalTicketPrice = finalIsFree ? 'Free' : (ticket_price || '');
 
       const eventData = {
         name,
@@ -236,6 +239,8 @@ app.put('/api/events/:id', upload.single('image'), async (req, res) => {
         start: { local: dateTime, timezone: 'UTC' },
         venue: { name: location, address: { localized_address_display: `${city}, ${country}` } },
         category: { name: req.body.category || '' },
+        is_free: finalIsFree,
+        ticket_price: finalTicketPrice
       };
 
       // If a new image was uploaded, update the path
@@ -298,10 +303,13 @@ app.post('/api/events', upload.single('image'), async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized: Invalid token' });
       }
 
-      const { name, dateTime, location, description, country, city, tags, organizedBy } = req.body;
+      const { name, dateTime, location, description, country, city, tags, organizedBy, is_free, ticket_price } = req.body;
       if (!name || !dateTime || !location || !country || !city || !organizedBy) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
+
+      let finalIsFree = is_free === true || is_free === 'true';
+      let finalTicketPrice = finalIsFree ? 'Free' : (ticket_price || '');
 
       const eventData = {
         name,
@@ -309,7 +317,9 @@ app.post('/api/events', upload.single('image'), async (req, res) => {
         start: { local: dateTime, timezone: 'UTC' },
         venue: { name: location, address: { localized_address_display: `${city}, ${country}` } },
         category: { name: req.body.category || '' },
-        createdBy: decoded.userId
+        createdBy: decoded.userId,
+        is_free: finalIsFree,
+        ticket_price: finalTicketPrice
       };
 
       // If an image was uploaded, add the path to the event data

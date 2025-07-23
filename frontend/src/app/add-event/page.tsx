@@ -19,6 +19,8 @@ export default function AddEventPage() {
   const [error, setError] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const router = useRouter();
+  const [isFree, setIsFree] = useState(false);
+  const [ticketPrice, setTicketPrice] = useState("");
 
   const categories = [
     "Business & Professional",
@@ -48,6 +50,8 @@ export default function AddEventPage() {
       formData.append("city", city);
       formData.append("organizedBy", organizedBy);
       formData.append("category", category);
+      formData.append("is_free", isFree ? "true" : "false");
+      formData.append("ticket_price", isFree ? "Free" : ticketPrice);
       if (image) {
         formData.append("image", image);
       }
@@ -166,6 +170,32 @@ export default function AddEventPage() {
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEventDescription(e.target.value)}
             required
             rows={4}
+          />
+        </div>
+        <div>
+          <Label htmlFor="isFree">Is this event free?</Label>
+          <input
+            id="isFree"
+            type="checkbox"
+            checked={isFree}
+            onChange={e => {
+              setIsFree(e.target.checked);
+              if (e.target.checked) setTicketPrice("Free");
+              else setTicketPrice("");
+            }}
+            className="ml-2"
+          />
+        </div>
+        <div>
+          <Label htmlFor="ticketPrice">Ticket Price</Label>
+          <Input
+            id="ticketPrice"
+            type="text"
+            value={isFree ? "Free" : ticketPrice}
+            onChange={e => setTicketPrice(e.target.value)}
+            disabled={isFree}
+            placeholder="e.g. 10, 10-20, etc."
+            required={!isFree}
           />
         </div>
         <div>

@@ -14,7 +14,14 @@ const EventSchema = new mongoose.Schema({
   start: { local: String, timezone: String },
   end: { local: String, timezone: String },
   url: String,
-  is_free: Boolean,
+  ticket_price: {
+    type: String,
+    default: "",
+  },
+  is_free: {
+    type: Boolean,
+    default: false,
+  },
   ticket_availability: {
     minimum_ticket_price: {
       major_value: String,

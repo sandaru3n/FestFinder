@@ -19,7 +19,7 @@ export default function EditEventPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const [currentEvent, setCurrentEvent] = useState<{ _id: string; name: string; start: { local: string }; venue: { name: string; address: { localized_address_display: string } }; logo?: { url: string }; description?: string; category?: { name: string }; organizedBy?: string } | null>(null);
+  const [currentEvent, setCurrentEvent] = useState<{ _id: string; name: string; start: { local: string }; venue: { name: string; address: { localized_address_display: string } }; logo?: { url: string }; description?: string; category?: { name: string }; organizedBy?: string; is_free?: boolean; ticket_price?: string } | null>(null);
   const router = useRouter();
   const params = useParams();
   const eventId = params.eventId as string;
@@ -32,6 +32,8 @@ export default function EditEventPage() {
     "Food & Drink"
   ];
   const [category, setCategory] = useState("");
+  const [isFree, setIsFree] = useState(false);
+  const [ticketPrice, setTicketPrice] = useState("");
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -61,6 +63,8 @@ export default function EditEventPage() {
         setCity(data.venue.address.localized_address_display?.split(", ")[0] || "");
         setOrganizedBy(data.organizedBy || "");
         setCategory(data.category?.name || "");
+        setIsFree(data.is_free || false);
+        setTicketPrice(data.ticket_price || (data.is_free ? "Free" : ""));
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);
         else setError("Failed to fetch event");
@@ -91,6 +95,8 @@ export default function EditEventPage() {
       formData.append("city", city);
       formData.append("organizedBy", organizedBy);
       formData.append("category", category);
+      formData.append("is_free", isFree ? "true" : "false");
+      formData.append("ticket_price", isFree ? "Free" : ticketPrice);
       if (image) {
         formData.append("image", image);
       }
@@ -217,6 +223,32 @@ export default function EditEventPage() {
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <Label htmlFor="isFree">Is this event free?</Label>
+            <input
+              id="isFree"
+              type="checkbox"
+              checked={isFree}
+              onChange={e => {
+                setIsFree(e.target.checked);
+                if (e.target.checked) setTicketPrice("Free");
+                else setTicketPrice("");
+              }}
+              className="ml-2"
+            />
+          </div>
+          <div>
+            <Label htmlFor="ticketPrice">Ticket Price</Label>
+            <Input
+              id="ticketPrice"
+              type="text"
+              value={isFree ? "Free" : ticketPrice}
+              onChange={e => setTicketPrice(e.target.value)}
+              disabled={isFree}
+              placeholder="e.g. 10, 10-20, etc."
+              required={!isFree}
+            />
           </div>
           <div>
             <Label htmlFor="eventDescription">About This Event</Label>
