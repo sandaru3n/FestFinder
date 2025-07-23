@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { HeaderNav } from "@/components/header-nav";
+import { RightSidebar } from "@/components/ui/right-sidebar";
 
 export default function ClientBody({
   children,
@@ -17,11 +18,21 @@ export default function ClientBody({
 
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith('/admin');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("token"));
+  }, []);
 
   return (
     <div className="antialiased">
       {!isAdminRoute && <HeaderNav />}
-      {children}
+      <div className="flex min-h-screen">
+        {isLoggedIn && !isAdminRoute && <RightSidebar />}
+        <div className="flex-1">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }

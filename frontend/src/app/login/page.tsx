@@ -16,6 +16,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("token"));
+  }, []);
 
   useEffect(() => {
     // Check if user is already logged in and redirect accordingly
@@ -50,8 +55,10 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token);
       if (data.role === 'admin') {
         router.push("/admin");
+        window.location.reload();
       } else {
         router.push("/");
+        window.location.reload();
       }
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);

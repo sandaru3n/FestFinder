@@ -21,6 +21,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Search, MapPin, Calendar, User, Menu, ChevronDown } from "lucide-react";
+import { UserDropdown } from "@/components/ui/user-dropdown";
 
 const cities = [
   { name: "New York, NY", slug: "new-york" },
@@ -44,7 +45,12 @@ export function HeaderNav() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("United States");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("token"));
+  }, []);
 
   // List of countries for manual selection
   const countries = [
@@ -195,21 +201,18 @@ export function HeaderNav() {
 
           {/* User Menu - Desktop */}
           <div className="hidden md:flex items-center space-x-3 ml-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="border-slate-300"
-              onClick={() => router.push('/login')}
-            >
-              Log In
-            </Button>
-            <Button 
-              size="sm" 
-              className="bg-orange-600 hover:bg-orange-700"
-              onClick={() => router.push('/signup')}
-            >
-              Sign Up
-            </Button>
+            {!isLoggedIn ? (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost">Login</Button>
+                </Link>
+                <Link href="/signup">
+                  <Button>Sign Up</Button>
+                </Link>
+              </>
+            ) : (
+              <UserDropdown />
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -289,27 +292,33 @@ export function HeaderNav() {
               About
             </Link>
             <div className="flex space-x-3 pt-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex-1"
-                onClick={() => {
-                  router.push('/login');
-                  setIsMobileMenuOpen(false);
-                }}
-              >
-                Log In
-              </Button>
-              <Button 
-                size="sm" 
-                className="flex-1 bg-orange-600 hover:bg-orange-700"
-                onClick={() => {
-                  router.push('/signup');
-                  setIsMobileMenuOpen(false);
-                }}
-              >
-                Sign Up
-              </Button>
+              {!isLoggedIn ? (
+                <>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => {
+                      router.push('/login');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Log In
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    className="flex-1 bg-orange-600 hover:bg-orange-700"
+                    onClick={() => {
+                      router.push('/signup');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Sign Up
+                  </Button>
+                </>
+              ) : (
+                <UserDropdown />
+              )}
             </div>
           </div>
         )}
