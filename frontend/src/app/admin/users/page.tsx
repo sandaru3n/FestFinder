@@ -29,7 +29,38 @@ export default function UsersPage() {
       if (!authorized) {
         router.push('/login');
       } else {
-        fetchUsers();
+        // Move fetchUsers here
+        setLoading(true);
+        setError(null);
+        try {
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+          const token = localStorage.getItem('token');
+          if (!token) throw new Error('No authentication token found');
+          let url = `${backendUrl}/api/admin/users?page=${currentPage}&limit=10`;
+          if (search) {
+            url += `&search=${encodeURIComponent(search)}`;
+          }
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to fetch users');
+          }
+          const data = await response.json();
+          setUsers(data.users);
+          setTotal(data.total);
+          setPages(data.pages);
+          setCurrentPage(data.currentPage);
+        } catch (err) {
+          console.error('Error fetching users:', err);
+          setError(err instanceof Error ? err.message : 'Failed to load users');
+        } finally {
+          setLoading(false);
+        }
       }
     };
     checkAuth();
