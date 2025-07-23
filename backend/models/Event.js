@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
 
+const allowedCategories = [
+  "Business & Professional",
+  "Music",
+  "Health & Wellness",
+  "Arts & Culture",
+  "Food & Drink"
+];
+
 const EventSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: String,
@@ -20,7 +28,11 @@ const EventSchema = new mongoose.Schema({
     }
   },
   category: {
-    name: String
+    name: {
+      type: String,
+      enum: allowedCategories,
+      required: true
+    }
   },
   logo: {
     url: String

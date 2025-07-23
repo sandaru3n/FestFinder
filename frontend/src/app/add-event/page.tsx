@@ -14,12 +14,20 @@ export default function AddEventPage() {
   const [eventDescription, setEventDescription] = useState("");
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
-  const [tags, setTags] = useState("");
   const [organizedBy, setOrganizedBy] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const router = useRouter();
+
+  const categories = [
+    "Business & Professional",
+    "Music",
+    "Health & Wellness",
+    "Arts & Culture",
+    "Food & Drink"
+  ];
+  const [category, setCategory] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +46,8 @@ export default function AddEventPage() {
       formData.append("description", eventDescription);
       formData.append("country", country);
       formData.append("city", city);
-      formData.append("tags", tags);
       formData.append("organizedBy", organizedBy);
+      formData.append("category", category);
       if (image) {
         formData.append("image", image);
       }
@@ -127,15 +135,6 @@ export default function AddEventPage() {
           />
         </div>
         <div>
-          <Label htmlFor="tags">Tags (comma-separated)</Label>
-          <Input
-            id="tags"
-            value={tags}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTags(e.target.value)}
-            placeholder="e.g., music, concert, outdoor"
-          />
-        </div>
-        <div>
           <Label htmlFor="organizedBy">Organized By</Label>
           <Input
             id="organizedBy"
@@ -143,6 +142,21 @@ export default function AddEventPage() {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOrganizedBy(e.target.value)}
             required
           />
+        </div>
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <select
+            id="category"
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+            required
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">Select a category</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
         </div>
         <div>
           <Label htmlFor="eventDescription">About This Event</Label>

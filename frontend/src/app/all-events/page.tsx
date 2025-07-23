@@ -80,7 +80,7 @@ export default function AllEventsPage() {
     });
   };
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -236,11 +236,11 @@ export default function AllEventsPage() {
                               <div className="flex flex-wrap gap-4 text-sm text-slate-500 mb-3">
                                 <div className="flex items-center">
                                   <Calendar className="w-4 h-4 mr-1" />
-                                  {formatDate(event.start.local)}
+                                  {formatDate(event.start?.local || "")}
                                 </div>
                                 <div className="flex items-center">
                                   <Clock className="w-4 h-4 mr-1" />
-                                  {formatTime(event.start.local)}
+                                  {formatTime(event.start?.local || "")}
                                 </div>
                                 <div className="flex items-center">
                                   <MapPin className="w-4 h-4 mr-1" />
@@ -252,9 +252,7 @@ export default function AllEventsPage() {
                                   {event.category?.name || ""}
                                 </Badge>
                                 <a
-                                  href={event.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
+                                  href={`/event/${event._id || event.id}`}
                                   className="inline-flex"
                                 >
                                   <Button size="sm">

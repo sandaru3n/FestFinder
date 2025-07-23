@@ -15,7 +15,6 @@ export default function EditEventPage() {
   const [eventDescription, setEventDescription] = useState("");
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
-  const [tags, setTags] = useState("");
   const [organizedBy, setOrganizedBy] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,6 +23,15 @@ export default function EditEventPage() {
   const router = useRouter();
   const params = useParams();
   const eventId = params.eventId as string;
+
+  const categories = [
+    "Business & Professional",
+    "Music",
+    "Health & Wellness",
+    "Arts & Culture",
+    "Food & Drink"
+  ];
+  const [category, setCategory] = useState("");
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -51,8 +59,8 @@ export default function EditEventPage() {
         setEventDescription(data.description || "");
         setCountry(data.venue.address.localized_address_display?.split(", ")[1] || "");
         setCity(data.venue.address.localized_address_display?.split(", ")[0] || "");
-        setTags(data.category.name || "");
         setOrganizedBy(data.organizedBy || "");
+        setCategory(data.category?.name || "");
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);
         else setError("Failed to fetch event");
@@ -81,8 +89,8 @@ export default function EditEventPage() {
       formData.append("description", eventDescription);
       formData.append("country", country);
       formData.append("city", city);
-      formData.append("tags", tags);
       formData.append("organizedBy", organizedBy);
+      formData.append("category", category);
       if (image) {
         formData.append("image", image);
       }
@@ -187,15 +195,6 @@ export default function EditEventPage() {
             />
           </div>
           <div>
-            <Label htmlFor="tags">Tags (comma-separated)</Label>
-            <Input
-              id="tags"
-              value={tags}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTags(e.target.value)}
-              placeholder="e.g., music, concert, outdoor"
-            />
-          </div>
-          <div>
             <Label htmlFor="organizedBy">Organized By</Label>
             <Input
               id="organizedBy"
@@ -203,6 +202,21 @@ export default function EditEventPage() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOrganizedBy(e.target.value)}
               required
             />
+          </div>
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <select
+              id="category"
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              required
+              className="w-full border rounded px-3 py-2"
+            >
+              <option value="">Select a category</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
           <div>
             <Label htmlFor="eventDescription">About This Event</Label>

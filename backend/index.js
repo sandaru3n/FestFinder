@@ -116,6 +116,17 @@ app.get('/events', async (req, res) => {
   }
 });
 
+// Public route to get a single event by ID (no auth required)
+app.get('/events/:id', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+    res.json(event);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch event' });
+  }
+});
+
 // Route to get all events (filtered by user or admin)
 app.get('/api/events', async (req, res) => {
   try {
@@ -208,7 +219,7 @@ app.put('/api/events/:id', upload.single('image'), async (req, res) => {
         description,
         start: { local: dateTime, timezone: 'UTC' },
         venue: { name: location, address: { localized_address_display: `${city}, ${country}` } },
-        category: { name: tags || '' },
+        category: { name: req.body.category || '' },
       };
 
       // If a new image was uploaded, update the path
@@ -281,7 +292,7 @@ app.post('/api/events', upload.single('image'), async (req, res) => {
         description,
         start: { local: dateTime, timezone: 'UTC' },
         venue: { name: location, address: { localized_address_display: `${city}, ${country}` } },
-        category: { name: tags || '' },
+        category: { name: req.body.category || '' },
         createdBy: decoded.userId
       };
 
