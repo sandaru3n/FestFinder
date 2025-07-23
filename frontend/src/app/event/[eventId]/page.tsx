@@ -7,9 +7,24 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, ExternalLink } from "lucide-react";
 
+type Event = {
+  _id?: string;
+  id?: string;
+  name: string;
+  description: string;
+  start: { local: string; timezone?: string };
+  end?: { local: string; timezone?: string };
+  url?: string;
+  is_free?: boolean;
+  ticket_availability?: { minimum_ticket_price?: { major_value: string; currency: string } };
+  venue?: { name?: string; address?: { localized_address_display?: string } };
+  category?: { name?: string };
+  logo?: { url?: string };
+};
+
 export default function EventDetailsPage() {
   const { eventId } = useParams();
-  const [event, setEvent] = useState<any>(null);
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 

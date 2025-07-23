@@ -32,47 +32,42 @@ export default function EventsPage() {
       if (!authorized) {
         router.push('/login');
       } else {
-        fetchEvents();
+        // Move fetchEvents here
+        setLoading(true);
+        setError(null);
+        try {
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+          const token = localStorage.getItem('token');
+          if (!token) throw new Error('No authentication token found');
+          let url = `${backendUrl}/api/admin/events?page=${currentPage}&limit=10`;
+          if (search) {
+            url += `&search=${encodeURIComponent(search)}`;
+          }
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to fetch events');
+          }
+          const data = await response.json();
+          setEvents(data.events);
+          setTotal(data.total);
+          setPages(data.pages);
+          setCurrentPage(data.currentPage);
+        } catch (err) {
+          console.error('Error fetching events:', err);
+          setError(err instanceof Error ? err.message : 'Failed to load events');
+        } finally {
+          setLoading(false);
+        }
       }
     };
     checkAuth();
   }, [router, currentPage, search]);
-
-  const fetchEvents = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
-      
-      let url = `${backendUrl}/api/admin/events?page=${currentPage}&limit=10`;
-      if (search) {
-        url += `&search=${encodeURIComponent(search)}`;
-      }
-      
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch events');
-      }
-      const data = await response.json();
-      setEvents(data.events);
-      setTotal(data.total);
-      setPages(data.pages);
-      setCurrentPage(data.currentPage);
-    } catch (err) {
-      console.error('Error fetching events:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load events');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -114,7 +109,7 @@ export default function EventsPage() {
         throw new Error(errorData.error || 'Failed to delete event');
       }
       // Refresh the event list
-      fetchEvents();
+      // fetchEvents(); // This line is removed as fetchEvents is now inside useEffect
     } catch (err) {
       console.error('Error deleting event:', err);
       alert(err instanceof Error ? err.message : 'Failed to delete event');
