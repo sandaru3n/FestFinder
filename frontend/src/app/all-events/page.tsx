@@ -9,8 +9,23 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Calendar, Clock, Filter, Search, ExternalLink } from "lucide-react";
 
+type Event = {
+  id?: string;
+  _id?: string;
+  name: string;
+  description: string;
+  start: { local: string };
+  end: { local: string };
+  url: string;
+  is_free: boolean;
+  ticket_availability?: { minimum_ticket_price?: { major_value: string; currency: string } };
+  venue?: { name?: string; address?: { localized_address_display?: string } };
+  category?: { name?: string };
+  logo?: { url?: string };
+};
+
 export default function AllEventsPage() {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -49,7 +64,7 @@ export default function AllEventsPage() {
     return matchesSearch && matchesCategory && matchesPrice && matchesDate;
   });
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "short",
       month: "short",
@@ -57,7 +72,7 @@ export default function AllEventsPage() {
     });
   };
 
-  const formatTime = (dateString) => {
+  const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
@@ -234,7 +249,7 @@ export default function AllEventsPage() {
                               </div>
                               <div className="flex items-center justify-between">
                                 <Badge variant="outline">
-                                  {event.category.name}
+                                  {event.category?.name || ""}
                                 </Badge>
                                 <a
                                   href={event.url}
