@@ -21,7 +21,7 @@ export default function About() {
             </h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
               We help you discover the best events happening in major cities across the country,
-              all automatically updated from Eventbrite in real-time.
+              all automatically updated from real-time.
             </p>
           </div>
 
@@ -34,7 +34,7 @@ export default function About() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 text-center">
-                  Events are automatically synced every hour from Eventbrite to ensure accuracy.
+                  Events are automatically synced every hour from real-time.
                 </p>
               </CardContent>
             </Card>
@@ -84,7 +84,7 @@ export default function About() {
             <CardContent className="text-center">
               <p className="text-lg text-slate-600 max-w-3xl mx-auto">
                 Events Finder was created to solve a simple problem: finding great events in your city
-                shouldn't be complicated. We aggregate events from Eventbrite and present them in a
+                shouldn't be complicated. We aggregate events from real-time and present them in a
                 clean, easy-to-use interface that helps you discover what's happening around you.
               </p>
             </CardContent>
@@ -121,7 +121,7 @@ export default function About() {
                   </div>
                   <h3 className="text-lg font-semibold mb-2">Attend & Enjoy</h3>
                   <p className="text-slate-600">
-                    Click through to Eventbrite to get your tickets and attend the event.
+                    Click through to get your tickets and attend the event.
                   </p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ export default function About() {
             <Link href="/terms" className="hover:text-blue-600">Terms of Service</Link>
           </div>
           <p className="text-slate-500 text-sm mt-4">
-            © 2025 Events Finder. Powered by Eventbrite API.
+            © 2025 Events Finder. Powered by real-time.
           </p>
         </div>
       </footer>

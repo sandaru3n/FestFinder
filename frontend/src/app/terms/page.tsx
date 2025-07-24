@@ -43,7 +43,7 @@ export default function Terms() {
               <CardContent className="space-y-4">
                 <p className="text-slate-600">
                   Events Finder is a web-based service that aggregates and displays event information
-                  from Eventbrite and other third-party sources. Our service allows users to:
+                  from third-party sources. Our service allows users to:
                 </p>
                 <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
                   <li>Browse events by location and category</li>
@@ -114,7 +114,7 @@ export default function Terms() {
               <CardContent className="space-y-4">
                 <p className="text-slate-600">
                   Our website contains links to third-party websites and services, including
-                  Eventbrite and event organizer websites. These links are provided for your
+                  event organizer websites. These links are provided for your
                   convenience only.
                 </p>
                 <p className="text-slate-600">
@@ -271,7 +271,7 @@ export default function Terms() {
             <Link href="/disclaimer" className="hover:text-blue-600">Disclaimer</Link>
           </div>
           <p className="text-slate-500 text-sm mt-4">
-            © 2025 Events Finder. Powered by Eventbrite API.
+            © 2025 Events Finder. Powered by third-party event data.
           </p>
         </div>
       </footer>

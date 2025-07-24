@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Events Finder - Discover Amazing Events Near You",
-  description: "Find concerts, workshops, networking events, and more happening in major cities across the country. Updated in real-time from Eventbrite.",
+  description: "Find concerts, workshops, networking events, and more happening in major cities across the country.",
 };
 
 export default function RootLayout({

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Users, Search, TrendingUp, Star } from "lucide-react";
-import { EventbriteEvent } from "@/lib/eventbrite";
 
 const majorCities = [
   {
@@ -62,60 +61,10 @@ const majorCities = [
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [nearbyEvents, setNearbyEvents] = useState<EventbriteEvent[]>([]);
-  const [loadingEvents, setLoadingEvents] = useState(false);
-  const [eventsError, setEventsError] = useState<string | null>(null);
-  const [eventsMessage, setEventsMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Auto-detect user location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-        },
-        () => {
-          setUserLocation(null);
-        }
-      );
-    }
-  }, []);
-
-  useEffect(() => {
-    if (userLocation) {
-      setLoadingEvents(true);
-      setEventsError(null);
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      fetch(`${backendUrl}/api/events/nearby`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
-          radius: "50km",
-          limit: 12
-        })
-      })
-        .then(res => res.json())
-        .then(data => {
-          setNearbyEvents(data.events || []);
-          if (data.message) {
-            setEventsMessage(data.message); // Display message like 'No events found near your location. Showing broader results.'
-          } else {
-            setEventsMessage(null);
-          }
-        })
-        .catch(() => {
-          setEventsError("Could not load nearby events.");
-          setEventsMessage(null);
-        })
-        .finally(() => setLoadingEvents(false));
-    }
-  }, [userLocation]);
+  // Remove all useState/useEffect for userLocation, nearbyEvents, loadingEvents, eventsError, eventsMessage
+  // Remove all code that fetches or displays nearby events
+  // Remove the 'Events Near You' section from the returned JSX
+  // Remove any references to MapPin, location detection, and related badges
 
   const filteredCities = majorCities.filter(city =>
     city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -133,7 +82,7 @@ export default function Home() {
           </h1>
           <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
             Find concerts, workshops, networking events, and more happening in major cities across the country.
-            Updated in real-time from Eventbrite.
+            Updated in real-time.
           </p>
 
           {/* Search Bar */}
@@ -167,14 +116,8 @@ export default function Home() {
         </div>
 
         {/* Auto-Location Section */}
-        {userLocation && (
-          <div className="mb-8 text-center">
-            <Badge variant="outline" className="text-sm py-2 px-4">
-              <MapPin className="w-4 h-4 mr-2" />
-              Location detected - showing nearby cities
-            </Badge>
-          </div>
-        )}
+        {/* Remove all code that fetches or displays nearby events */}
+        {/* Remove any references to MapPin, location detection, and related badges */}
 
         {/* City Selection Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -220,58 +163,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Nearby Events Section */}
-        {userLocation && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-center">Events Near You</h2>
-            {loadingEvents && <div className="text-center text-slate-500">Loading events...</div>}
-            {eventsError && <div className="text-center text-red-500">{eventsError}</div>}
-            {eventsMessage && (
-              <div className="mb-4 text-yellow-600 bg-yellow-100 p-3 rounded-md text-sm">
-                {eventsMessage}
-              </div>
-            )}
-            {!loadingEvents && !eventsError && nearbyEvents.length === 0 && (
-              <div className="text-center text-slate-500">No events found near your location.</div>
-            )}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {nearbyEvents.map(event => (
-                <Card key={event.id} className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer border-2 hover:border-blue-300">
-                  <div className="relative">
-                    {event.logo?.url && (
-                      <img
-                        src={event.logo.url}
-                        alt={event.name}
-                        className="w-full h-48 object-cover rounded-t-lg"
-                      />
-                    )}
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{event.name}</span>
-                    </CardTitle>
-                    <CardDescription>
-                      {event.venue?.address?.localized_address_display || ""}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <Badge>{event.category?.name}</Badge>
-                      {event.is_free && <Badge className="bg-green-500 text-white">Free</Badge>}
-                    </div>
-                    <div className="text-slate-600 text-sm mb-2">
-                      {event.start?.local ? new Date(event.start.local).toLocaleString() : ""}
-                    </div>
-                    <a href={event.url} target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">View Event</Button>
-                    </a>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Sidebar Ad Zone */}
         <div className="lg:absolute lg:right-4 lg:top-1/2 lg:transform lg:-translate-y-1/2 mb-8 lg:mb-0">
           <div className="w-full lg:w-80 bg-slate-200 rounded-lg p-4 text-center">
@@ -289,7 +180,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-semibold mb-2">Real-Time Updates</h3>
             <p className="text-slate-600">
-              Events are automatically updated every hour from Eventbrite to ensure you never miss out.
+              Events are automatically updated every hour.
             </p>
           </div>
           <div className="text-center">

@@ -38,7 +38,7 @@ export default function Disclaimer() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-slate-600">
-                  Events Finder aggregates event information from Eventbrite and other third-party sources.
+                  Events Finder aggregates event information from third-party sources.
                   While we strive to provide accurate and up-to-date information, we cannot guarantee
                   the accuracy, completeness, or reliability of all event details.
                 </p>

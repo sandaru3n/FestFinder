@@ -32,37 +32,6 @@ export async function GET(
     const dateFilter = searchParams.get("date") || "";
     const query = searchParams.get("q") || "";
 
-    // In a real implementation, you would call the Eventbrite API here
-    // For now, we'll return mock data
-
-    // Example Eventbrite API call (commented out):
-    /*
-    const eventbriteApiKey = process.env.EVENTBRITE_API_KEY;
-    const eventbriteUrl = `https://www.eventbriteapi.com/v3/events/search/`;
-
-    const params = new URLSearchParams({
-      "location.address": locationId,
-      "expand": "venue,category,subcategory,format,ticket_availability",
-      "sort_by": "date",
-      "start_date.range_start": new Date().toISOString(),
-      ...(category && { "categories": category }),
-      ...(query && { "q": query })
-    });
-
-    const response = await fetch(`${eventbriteUrl}?${params}`, {
-      headers: {
-        "Authorization": `Bearer ${eventbriteApiKey}`,
-        "Content-Type": "application/json"
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch events from Eventbrite");
-    }
-
-    const data = await response.json();
-    */
-
     // Mock data for demonstration
     const mockEvents = [
       {

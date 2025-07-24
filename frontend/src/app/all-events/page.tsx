@@ -304,7 +304,7 @@ export default function AllEventsPage() {
             <Link href="/terms" className="hover:text-blue-600">Terms of Service</Link>
           </div>
           <p className="text-slate-500 text-sm mt-4">
-            © 2025 Events Finder. Events powered by Eventbrite.
+            © 2025 Events Finder.
           </p>
         </div>
       </footer>
